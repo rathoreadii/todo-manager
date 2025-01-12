@@ -10,9 +10,23 @@
     <div class="grid-container">
         <input id="todo-input" type="text" placeholder="Enter ToDo Here">
         <input id="todo-date" type="date">
+        <select id="todo-priority">
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+        </select>
         <button class="btn-todo" onclick="addTodo();">Add</button>
         <button class="btn-update" style="display: none;">Update</button>
-        <button class="btn-sort" onclick="sortByDate()">Sort by Due Date</button>
+        <!-- <button class="btn-sort" onclick="sortByDate()">Sort by Due Date</button> -->
+        <select id="todo-actions" onchange="handleAction(this.value)">
+            <option value="" selected disabled>Choose Action</option>
+            <option value="sortByDate">Sort by Due Date</option>
+            <option value="sortByPriority">Sort by Priority</option>
+            <option value="filterOverDue">Over Due</option>
+            <option value="filterToday">Today</option>
+            <option value="filterWeek">Week</option>
+            <option value="clearFilters">Clear filters</option>
+        </select>
     </div>
 
     <div class="todo-container grid-container"></div>

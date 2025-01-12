@@ -1,24 +1,28 @@
 let todoList = JSON.parse(localStorage.getItem('todoList')) || [
-//   { item: '', dueDate: '' },
-//   { item: '', dueDate: '' }
+//   { item: '', dueDate: '', priority: '' },
+//   { item: '', dueDate: '', priority: '' }
 ];
 
 displayItems(); //loads the previous content on load
 
+// adding task handler function
 function addTodo()
 {
     let inputElement = document.querySelector('#todo-input');
     let todoItem = inputElement.value;
+    let priorityElement= document.querySelector('#todo-priority')
     
     let dateElement = document.querySelector('#todo-date');
     let todoDate = dateElement.value;
+    let todoPriority = priorityElement.value;
 
-    if (!validInput(inputElement, dateElement))
+    if (!validInput(inputElement, dateElement, priorityElement))
         return;
 
-    todoList.push({ item: todoItem, dueDate: todoDate });
+    todoList.push({ item: todoItem, dueDate: todoDate, priority: todoPriority});
     inputElement.value = '';
     dateElement.value = '';
+    priorityElement.value = 'High';
 
     displayItems(); //refreshes the display every time a work is added to the list 
 }
@@ -28,15 +32,32 @@ function displayItems()
     let containerElement = document.querySelector('.todo-container');
     let newHtml = '';
 
+    const today = new Date();
+
     // creating new section for each work as the list is updated/added or removing a deleted section from the display on delete
 
-    for (let i = 0; i < todoList.length; i++)
+    for (let{item, dueDate, priority} of todoList)
     {
-        let { item, dueDate } = todoList[i];
-        newHtml += `<span>${item}</span>
+        let itemDate = new Date(dueDate);
+        let today = new Date();
+        let color;
+        if (itemDate.getFullYear() === today.getFullYear() && itemDate.getMonth() === today.getMonth() && itemDate.getDate() === today.getDate())
+        {
+            color = 'yellow';
+        }
+        else if (itemDate < today)
+        {
+            color = 'red';
+        }
+        else if(itemDate > today && itemDate <= new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7))
+        {
+            color = 'green';
+        }
+        newHtml += `<span style= "color: ${color};">${item}</span>
                     <span>${dueDate}</span>
-                    <button class="btn-edit" onclick="editTodo(${i})">✏️</button>
-                    <button class="btn-delete" onclick="deleteTodo(${i})">🗑️</button>`;
+                    <span>${priority}</span>
+                    <button class="btn-edit" onclick="editTodo(${item})">✏️</button>
+                    <button class="btn-delete" onclick="deleteTodo(${item})">🗑️</button>`;
     }
     containerElement.innerHTML = newHtml;
 }
@@ -61,15 +82,26 @@ function sortByDate()
     displayItems();
 }
 
+// sort by priority
+function sortByPriority()
+{
+    const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+    todoList.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+    saveToLocalStorage();
+    displayItems();
+}
+
 // editing option for each work like changing the content or/and date
 function editTodo(index)
 {
-    let { item, dueDate } = todoList[index];
+    let { item, dueDate, priority } = todoList[index];
 
     let inputElement = document.querySelector('#todo-input');
     let dateElement = document.querySelector('#todo-date');
+    let priorityElement = document.querySelector('#todo-priority');
     inputElement.value = item;
     dateElement.value = dueDate;
+    priorityElement.value = priority;
 
     document.querySelector('.btn-todo').style.display = 'none';
     document.querySelector('.btn-update').style.display = 'inline';
@@ -78,12 +110,14 @@ function editTodo(index)
         function () {
             let updateItem = inputElement.value.trim();
             let updateDate = dateElement.value;
+            let updatePriority = priorityElement.value;
 
-            if (updateItem && updateDate) {
-                todoList[index] = { item: updateItem, dueDate: updateDate };
+            if (updateItem && updateDate && updatePriority) {
+                todoList[index] = { item: updateItem, dueDate: updateDate, priority: updatePriority };
                 saveToLocalStorage();
                 inputElement.value = '';
                 dateElement.value = '';
+                priorityElement.value = 'High';
                 displayItems();
 
                 //reset buttons
@@ -98,7 +132,7 @@ function editTodo(index)
 }
 
 // input validation
-function validInput(inputElement, dateElement)
+function validInput(inputElement, dateElement, priorityElement)
 {
     let isValid = true;
 
@@ -122,7 +156,106 @@ function validInput(inputElement, dateElement)
         dateElement.style.borderColor = 'green';
     }
 
+    if (!priorityElement.value)
+    {
+        priorityElement.style.borderColor = 'red';
+        isValid = false;
+    }
+    else
+    {
+        priorityElement.style.borderColor = 'green';
+    }
+
     return isValid;
+}
+
+// filter options
+function handleAction(action)
+{
+    switch (action)
+    {
+        case "sortByDate":
+            sortByDate();
+            break;
+        
+        case "sortByPriority":
+            sortByPriority();
+            break;
+        
+        case "filterOverDue":
+            filterTasks("overdue");
+            break;
+        
+        case "filterToday":
+            filterTasks("today");
+            break;
+        
+        case "filterWeek":
+            filterTasks("week");
+            break;
+        
+        case "clearFilters":
+            displayItems();
+            break;
+    }
+
+    if (action !== "clearFilters") {
+        document.querySelector('#todo-actions').value = action;
+    }
+    else
+    {
+        document.querySelector('#todo-actions').value = "";
+    }// reset dropdown
+}
+
+// filter task list creation
+function filterTasks(filter)
+{
+    const today = new Date();
+    let filteredList;
+    
+    if (filter === "overdue")
+    {
+        filteredList = todoList.filter(item => new Date(item.dueDate) < today);
+    }
+    else if (filter === "today")
+    {
+        filteredList = todoList.filter(item => {
+            const itemDueDate = new Date(item.dueDate);
+            return itemDueDate.getFullYear() === today.getFullYear() &&
+                itemDueDate.getMonth() === today.getMonth() &&
+                itemDueDate.getDate() === today.getDate();
+        });
+    }
+    else if (filter === "week")
+    {
+        const endOfWeek = new Date();
+        endOfWeek.setDate(today.getDate() + 7);
+        filteredList = todoList.filter(item => {
+            const itemDueDate = new Date(item.dueDate);
+            return itemDueDate >= today && itemDueDate <= endOfWeek;
+        });
+    }
+
+    // console.log(filteredList);
+    displayFilteredItems(filteredList);
+}
+
+function displayFilteredItems(list)
+{
+    let containerElement = document.querySelector('.todo-container');
+    let newHtml = '';
+
+    for (let { item, dueDate, priority } of list)
+    {
+        newHtml+=  `<span>${item}</span>
+                    <span>${dueDate}</span>
+                    <span>${priority}</span>
+                    <button class="btn-edit" onclick="editTodo(${item})">✏️</button>
+                    <button class="btn-delete" onclick="deleteTodo(${item})">🗑️</button>`;
+    }
+
+    containerElement.innerHTML = newHtml;
 }
 
 

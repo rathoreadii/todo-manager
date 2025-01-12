@@ -9,7 +9,7 @@ body {
 .grid-container {
     display: grid;
     justify-content: center;
-    grid-template-columns: 200px 150px 100px 120px;
+    grid-template-columns: 200px 150px 100px 120px 140px;
     column-gap: 10px;
     row-gap: 10px;
     margin-top: 10px;
@@ -58,11 +58,23 @@ body {
     cursor: pointer;
 }
 
-.btn-sort {
+/* .btn-sort {
     background-color: rgb(4, 170, 153);
     color: white;
     border: none;
     border-radius: 10px;
     padding: 15px 0px;
     cursor: pointer;
+} */
+
+#todo-priority {
+    padding: 10px;
+    font-size: 15px;
+}
+
+#todo-actions {
+    padding: 10px;
+    font-size: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
