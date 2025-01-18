@@ -78,3 +78,23 @@ body {
     border-radius: 5px;
     border: 1px solid #ccc;
 }
+
+.search-container {
+    display: grid;
+    justify-content: center;
+    grid-template-columns: 300px 40px;
+    /* height: 30px; */
+    padding-bottom: 10px;
+}
+
+#search-input {
+    font-size: 20px;
+    border-radius: 10px;
+    text-align: center;
+    border-style: none;
+    border: solid white 1px;
+}
+
+#clear-search {
+    margin-left: 5px;
+}

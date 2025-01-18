@@ -66,9 +66,13 @@ function displayItems()
 // delete button
 function deleteTodo(index)
 {
+    const actualIndex = todoList.findIndex(task => task.item === todoList[index].item);
+    if (actualIndex === -1)
+        return;
+
     if(confirm(`Are you sure you want to delete this task?`))
     {
-        todoList.splice(index, 1);
+        todoList.splice(actualIndex, 1);
         saveToLocalStorage();
         displayItems();
     }
@@ -94,7 +98,11 @@ function sortByPriority()
 // editing option for each work like changing the content or/and date
 function editTodo(index)
 {
-    let { item, dueDate, priority } = todoList[index];
+    const actualIndex = todoList.findIndex(task => task.item === todoList[index].item);
+    if (actualIndex === -1)
+        return;
+
+    let { item, dueDate, priority } = todoList[actualIndex];
 
     let inputElement = document.querySelector('#todo-input');
     let dateElement = document.querySelector('#todo-date');
@@ -113,7 +121,7 @@ function editTodo(index)
             let updatePriority = priorityElement.value;
 
             if (updateItem && updateDate && updatePriority) {
-                todoList[index] = { item: updateItem, dueDate: updateDate, priority: updatePriority };
+                todoList[actualIndex] = { item: updateItem, dueDate: updateDate, priority: updatePriority };
                 saveToLocalStorage();
                 inputElement.value = '';
                 dateElement.value = '';
@@ -126,7 +134,7 @@ function editTodo(index)
             }
 
             else {
-                alert(`Please enter both task and due date.`);
+                alert(`Please enter all details.`);
             }
         };
 }
@@ -241,23 +249,56 @@ function filterTasks(filter)
     displayFilteredItems(filteredList);
 }
 
+// search functionality
+let debounceTimeout;
+function searchItems(query)
+{
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(() => {
+        query = query.trim().toLowerCase();
+
+        // if search bar is empty, display the full list
+        if (query === '')
+        {
+            displayItems();
+            return;
+        }
+
+        const filteredList = todoList.filter(task =>
+            task.item.toLowerCase().includes(query)
+        );
+        displayFilteredItems(filteredList);
+    }, 100);
+}
+
+// clear search
+function clearSearch()
+{
+    const searchInput = document.querySelector('#search-input');
+    searchInput.value = '';
+    clearTimeout(debounceTimeout);
+    displayItems();
+}
+
+// displays the filtered or searched list
 function displayFilteredItems(list)
 {
     let containerElement = document.querySelector('.todo-container');
     let newHtml = '';
 
-    for (let { item, dueDate, priority } of list)
-    {
-        newHtml+=  `<span>${item}</span>
-                    <span>${dueDate}</span>
-                    <span>${priority}</span>
-                    <button class="btn-edit" onclick="editTodo(${item})">✏️</button>
-                    <button class="btn-delete" onclick="deleteTodo(${item})">🗑️</button>`;
-    }
+    list.forEach((task, index) => {
+        const { item, dueDate, priority } = task;
+        newHtml += `<div class= "todo-item">
+                        <span>${item}</span>
+                        <span>${dueDate}</span>
+                        <span>${priority}</span>
+                        <button class="btn-edit" onclick="editTodo(${index})">✏️</button>
+                        <button class="btn-delete" onclick="deleteTodo(${index})">🗑️</button>
+                    </div>`
+    });
 
-    containerElement.innerHTML = newHtml;
+    containerElement.innerHTML = newHtml || `<p>No tasks found</p>`;    // displays message if no items found in the list
 }
-
 
 // local storage
 function saveToLocalStorage()

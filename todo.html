@@ -7,6 +7,11 @@
 <body>
     <h1 id="main-heading">To~Do</h1>
 
+    <div class="search-container">
+        <input id="search-input" type="text" placeholder="Search-tasks..." onchange="searchItems(this.value)">
+        <button id="clear-search" onclick="clearSearch()">❌</button>
+    </div>
+
     <div class="grid-container">
         <input id="todo-input" type="text" placeholder="Enter ToDo Here">
         <input id="todo-date" type="date">
