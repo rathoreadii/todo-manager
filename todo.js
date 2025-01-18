@@ -288,13 +288,11 @@ function displayFilteredItems(list)
 
     list.forEach((task, index) => {
         const { item, dueDate, priority } = task;
-        newHtml += `<div class= "todo-item">
-                        <span>${item}</span>
-                        <span>${dueDate}</span>
-                        <span>${priority}</span>
-                        <button class="btn-edit" onclick="editTodo(${index})">✏️</button>
-                        <button class="btn-delete" onclick="deleteTodo(${index})">🗑️</button>
-                    </div>`
+        newHtml += `<span>${item}</span>
+                    <span>${dueDate}</span>
+                    <span>${priority}</span>
+                    <button class="btn-edit" onclick="editTodo(${index})">✏️</button>
+                    <button class="btn-delete" onclick="deleteTodo(${index})">🗑️</button>`
     });
 
     containerElement.innerHTML = newHtml || `<p>No tasks found</p>`;    // displays message if no items found in the list
